@@ -10,6 +10,14 @@ type TodoService struct {
 	Stor *Store
 }
 
+// NewTodoService creates new instance of TodoService and
+// returns pointer on it.
+func NewTodoService() *TodoService {
+	return &TodoService{
+		Stor: New(),
+	}
+}
+
 // TodoById gets specifict Todo by its id.
 func (ts TodoService) TodoByID(id string) (*todo.Todo, error) {
 	el, err := ts.Stor.Get(id)
