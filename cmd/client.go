@@ -30,13 +30,6 @@ func CreateClient(s todo.TodoService) *Client {
 
 // Process parses user command and retreives result.
 func (c *Client) Process() {
-	for i := 0; i < 100; i++ {
-		c.serv.Create(&todo.Todo{
-			ID:     fmt.Sprintf("%d", i+1),
-			Name:   fmt.Sprintf("Test %d", i+1),
-			Status: todo.Status(todo.Pending),
-		})
-	}
 	if len(os.Args) < 2 {
 		fmt.Printf("Command is required. Type todo help to see available commands.")
 		os.Exit(1)
@@ -66,6 +59,7 @@ func (c *Client) Process() {
 		printList(c)
 		os.Exit(0)
 	case addFS.Parsed():
+		addTodo(c)
 		os.Exit(0)
 	case statusFS.Parsed():
 		os.Exit(0)
@@ -171,5 +165,24 @@ func printList(c *Client) {
 }
 
 // Add
+func addTodo(c *Client) {
+	if len(os.Args) != 3 {
+		fmt.Println("Invalid arguments count. Expected todo add \"<name>\". Type todo help add to read more.")
+		return
+	}
+	name := os.Args[2]
+	fmt.Println(name)
+	todo := &todo.Todo{
+		ID:     "0",
+		Name:   name,
+		Status: todo.Status(todo.Pending),
+	}
+	err := c.serv.Create(todo)
+	if err != nil {
+		fmt.Printf("Unable to create todo item. Reason: %s\n", err.Error())
+		return
+	}
+	printList(c)
+}
 
 // Status
