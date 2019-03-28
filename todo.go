@@ -16,6 +16,20 @@ const (
 // Status represents current state for specifict task.
 type Status int8
 
+// String returns stirng representation of status.
+func (s Status) String() string {
+	switch s {
+	case Pending:
+		return "Pending"
+	case Done:
+		return "Done"
+	case InProgress:
+		return "InProgress"
+	default:
+		return ""
+	}
+}
+
 // Error represents todo error.
 type Error string
 
@@ -35,7 +49,12 @@ type Todo struct {
 
 // TodoService manages todo item.
 type TodoService interface {
-	TodoByID(id string) (*Todo, error)
+	// All returns all todos.
+	All() []*Todo
+	// ByID retruns todo by its id.
+	ByID(id string) (*Todo, error)
+	// Create creates new todo.
 	Create(el *Todo) error
-	SetStatus(todoID string, status Status) error
+	// Status changes todo item status.
+	Status(todoID string, status Status) error
 }

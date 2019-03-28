@@ -30,8 +30,15 @@ func CreateClient(s todo.TodoService) *Client {
 
 // Process parses user command and retreives result.
 func (c *Client) Process() {
+	for i := 0; i < 100; i++ {
+		c.serv.Create(&todo.Todo{
+			ID:     fmt.Sprintf("%d", i+1),
+			Name:   fmt.Sprintf("Test %d", i+1),
+			Status: todo.Status(todo.Pending),
+		})
+	}
 	if len(os.Args) < 2 {
-		fmt.Printf("Command is required. Type help to see available commands.")
+		fmt.Printf("Command is required. Type todo help to see available commands.")
 		os.Exit(1)
 	}
 
@@ -56,6 +63,7 @@ func (c *Client) Process() {
 		printHelp()
 		os.Exit(0)
 	case listFS.Parsed():
+		printList(c)
 		os.Exit(0)
 	case addFS.Parsed():
 		os.Exit(0)
@@ -64,7 +72,7 @@ func (c *Client) Process() {
 	}
 }
 
-/// Help
+// Help
 func printHelp() {
 	if len(os.Args) > 3 {
 		fmt.Printf("Too many arguments provided.")
@@ -144,8 +152,24 @@ func printStatusHelp() {
 	fmt.Printf(sb.String())
 }
 
-/// List
+// List
+func printList(c *Client) {
+	todos := c.serv.All()
+	if todos == nil || len(todos) == 0 {
+		fmt.Printf("\nNothing to show\n")
+		return
+	}
+	sb := &strings.Builder{}
+	sb.WriteString("\nAgenda:\n")
+	sb.WriteString("\tid\tname\tstatus")
+	sb.WriteString("\n\t--\t----\t------")
+	for _, e := range todos {
+		sb.WriteString(fmt.Sprintf("\n\t%s\t%s\t%s", e.ID, e.Name, e.Status.String()))
+	}
+	sb.WriteString("\n\n")
+	fmt.Printf(sb.String())
+}
 
-/// Add
+// Add
 
-/// Status
+// Status

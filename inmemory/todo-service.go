@@ -1,6 +1,10 @@
 package inmemory
 
-import todo "github.com/kolodach/golang-todo"
+import (
+	"sort"
+
+	todo "github.com/kolodach/golang-todo"
+)
 
 // Ensure TodoService implements todo.TodoService.
 var _ todo.TodoService = &TodoService{}
@@ -18,8 +22,24 @@ func NewTodoService() *TodoService {
 	}
 }
 
+// All returns all todos.
+func (ts TodoService) All() []*todo.Todo {
+	els := ts.Stor.All()
+	if els == nil {
+		return nil
+	}
+	todos := make([]*todo.Todo, len(els))
+	for i, el := range els {
+		todos[i] = el.(*todo.Todo)
+	}
+	sort.Slice(todos, func(i, j int) bool {
+		return todos[i].Name > todos[j].Name
+	})
+	return todos
+}
+
 // TodoById gets specifict Todo by its id.
-func (ts TodoService) TodoByID(id string) (*todo.Todo, error) {
+func (ts TodoService) ByID(id string) (*todo.Todo, error) {
 	el, err := ts.Stor.Get(id)
 	if err != nil {
 		return nil, err
@@ -39,12 +59,12 @@ func (ts TodoService) Create(el *todo.Todo) error {
 }
 
 // SetStatus changes current todo status to new.
-func (ts TodoService) SetStatus(todoID string, status todo.Status) error {
-	el, err := ts.Stor.Get(todoID)
+func (ts TodoService) Status(ID string, s todo.Status) error {
+	el, err := ts.Stor.Get(ID)
 	if err != nil {
 		return err
 	}
 	todoEl, _ := el.(*todo.Todo)
-	todoEl.Status = status
+	todoEl.Status = s
 	return nil
 }

@@ -21,7 +21,7 @@ func TestTodoService_CreateTodo(t *testing.T) {
 
 	s.Create(el)
 
-	savedEl, err := s.TodoByID("1")
+	savedEl, err := s.ByID("1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,12 +48,12 @@ func TestTodoService_ChangeTodoState(t *testing.T) {
 	}
 
 	s.Create(el)
-	statErr := s.SetStatus(el.ID, todo.Status(todo.Done))
+	statErr := s.Status(el.ID, todo.Status(todo.Done))
 
 	if statErr != nil {
 		t.Fatal(statErr)
 	}
-	savedEl, err := s.TodoByID("1")
+	savedEl, err := s.ByID("1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,5 +65,38 @@ func TestTodoService_ChangeTodoState(t *testing.T) {
 	}
 	if savedEl.Status != todo.Status(todo.Done) {
 		t.Fatal(errors.New("Todo status is not valid"))
+	}
+}
+
+// Ensure TodoService can return all elements
+func TestTodoService_CanGetAll(t *testing.T) {
+	s := inmemory.NewTodoService()
+
+	el1 := &todo.Todo{
+		ID:     "1",
+		Name:   "test1",
+		Status: todo.Status(todo.Pending),
+	}
+	el2 := &todo.Todo{
+		ID:     "2",
+		Name:   "test2",
+		Status: todo.Status(todo.Pending),
+	}
+
+	s.Create(el1)
+	s.Create(el2)
+
+	all := s.All()
+	if all == nil {
+		t.Fatal(errors.New("null slice"))
+	}
+	if len(all) != 2 {
+		t.Fatal(errors.New("Invalid lingth"))
+	}
+	if all[0] != el1 {
+		t.Fatal(errors.New("Invalid element1"))
+	}
+	if all[1] != el2 {
+		t.Fatal(errors.New("Invalid element2"))
 	}
 }

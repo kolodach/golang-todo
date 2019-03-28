@@ -11,6 +11,21 @@ func New() *Store {
 	return &stor
 }
 
+// All returns all elements in store
+func (stor Store) All() []interface{} {
+	if stor == nil {
+		return nil
+	}
+	els := make([]interface{}, len(stor))
+	i := 0
+	for _, v := range stor {
+		els[i] = v
+		i++
+	}
+
+	return els
+}
+
 // Exists check whether element with specific string id exists.
 func (stor Store) Exists(id string) bool {
 	_, ok := stor[id]
