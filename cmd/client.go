@@ -48,7 +48,7 @@ func (c *Client) Process() {
 	case addCmd:
 		addFS.Parse(os.Args[2:])
 	case statusCmd:
-		addFS.Parse(os.Args[2:])
+		statusFS.Parse(os.Args[2:])
 	}
 
 	switch {
@@ -62,6 +62,7 @@ func (c *Client) Process() {
 		addTodo(c)
 		os.Exit(0)
 	case statusFS.Parsed():
+		setStatus(c)
 		os.Exit(0)
 	}
 }
@@ -186,3 +187,34 @@ func addTodo(c *Client) {
 }
 
 // Status
+func setStatus(c *Client) {
+	if len(os.Args) < 4 {
+		fmt.Println("Not enought parms provided. Type todo help status to view docs.")
+		return
+	}
+	if len(os.Args) > 4 {
+		fmt.Println("Too many params provided. Type todo help status to view docs.")
+		return
+	}
+	statePrefMap := map[string]todo.Status{
+		"-p": todo.Status(todo.Pending),
+		"-d": todo.Status(todo.Done),
+		"-i": todo.Status(todo.InProgress),
+	}
+	id := os.Args[2]
+	todo, err := c.serv.ByID(id)
+	if err != nil {
+		fmt.Printf("Can not find todo with id:%s", id)
+		return
+	}
+	newState, exists := statePrefMap[os.Args[3]]
+	if !exists {
+		fmt.Printf("Invalid state %s. Type \n\ttodo help state\n to see available statuses.", os.Args[3])
+		return
+	}
+	if todo.Status != newState {
+		c.serv.Status(id, newState)
+	}
+	fmt.Printf("\n\t%s\t%s\t%s\n", todo.ID, todo.Name, todo.Status.String())
+}
+	
